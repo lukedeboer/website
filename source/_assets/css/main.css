@@ -1,3 +1,25 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+
+@font-face {
+    font-family: 'Concretica';
+    src: local('Concretica'), url(./skconcretica-regulartrial-webfont.woff) format('woff');
+  }
+
+  @font-face {
+    font-family: 'Resist';
+    src: local('Resist'), url(./resist-sans.woff) format('woff');
+  }
+  
+  #test {
+    background:gray;
+    width:200px;
+    height:200px;
+ cursor:url(http://www.javascriptkit.com/dhtmltutors/cursor-hand.gif), auto;
+}
+
+#editMe:empty:before {
+  content: attr(data-placeholder);
+  }

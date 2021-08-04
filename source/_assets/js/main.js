@@ -1,6 +1,9 @@
 //import three.js and cannon js
+//renderer
 import * as THREE from 'three';
+//Physics engine
 import CANNON from 'cannon';
+
 
 // declare our global variables
 var scene, clock, camera, renderer, loader, world, mouse, raycaster;
@@ -22,7 +25,7 @@ renderer = new THREE.WebGLRenderer({
     antialias: true,
     canvas: $container
 });
-    renderer.setClearColor(0x202533);
+    renderer.setClearColor(0x0000);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
@@ -74,8 +77,8 @@ function initThree(){
         height: 0.4,
         curveSegments: 24,
         bevelEnabled: true,
-        bevelThickness: 0.9,
-        bevelSize: 0.3,
+        bevelThickness: 0.19,
+        bevelSize: 0.01,
         bevelOffset: 0,
         bevelSegments: 10
       };
@@ -99,7 +102,7 @@ function initThree(){
         //parsing each letter to generate a mesh
 
         Array.from(innerText).forEach(function (letter, j){
-            const material = new THREE.MeshPhongMaterial({color: 0x97df5e});
+            const material = new THREE.MeshPhongMaterial({color: 0xffffff});
             const geometry = new THREE.TextBufferGeometry(letter, fontOption);
 
             geometry.computeBoundingBox();
@@ -114,13 +117,14 @@ function initThree(){
             const box = new CANNON.Box(new CANNON.Vec3().copy(mesh.size).scale(0.5));
             //attach the body directly to the mesh
             mesh.body = new CANNON.Body({
+                //we divide the total mass by the length of the string to have a common weight for each word
                 mass: totalMass / innerText.length,
                 position: new CANNON.Vec3(words.letterOff, getOffsetY(i), 0)
             });
-
+            // add shape to the body and offset it to match of the center of our mesh
             const { center } = mesh.geometry.boundingSphere;
             mesh.body.addShape(box, new CANNON.Vec3(center.x, center.y, center.z));
-
+            //add body to our world
             world.addBody(mesh.body);
             words.add(mesh);
 
@@ -129,7 +133,7 @@ function initThree(){
         words.children.forEach(letter => {
             letter.body.position.x -= letter.size.x + words.letterOff * 0.5;
           });
-
+        
         wordsStorage.push(words);
         scene.add(words);
       });
@@ -141,11 +145,11 @@ function initThree(){
     const ambientLight = new THREE.AmbientLight(0xcccccc);
     scene.add(ambientLight);
 
-    const foreLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    const foreLight = new THREE.DirectionalLight(0xffffff, 0.1);
     foreLight.position.set(5,5, 20);
     scene.add(foreLight);
 
-    const backLight = new THREE.DirectionalLight(0xffffff, 1);
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
     backLight.position.set(-5, -5, -5);
     scene.add(backLight);
 
@@ -257,21 +261,21 @@ function initCannon(){
             console.log(object.id);
 
            
-
+            //what page to go to depending on what letter of which word was yeeted
             if (object.id > 18 && object.id < 27){
                 console.log("going to Projects")
-                setTimeout(function(){ window.location.href = "http://google.com.au";; }, 1000);
+                setTimeout(function(){ window.location.href = "/projects";; }, 1000);
                 
             }
 
             if (object.id > 27 && object.id < 35){
                 console.log("contact");
-                setTimeout(function(){ window.location.href = "http://yahoo.com.au";; }, 1000);
+                setTimeout(function(){ window.location.href = "/contact";; }, 1000);
             }
 
             if (object.id > 35 && object.id < 41){
                 console.log("About")
-                setTimeout(function(){ window.location.href = "http://apple.com.au";; }, 1000);
+                setTimeout(function(){ window.location.href = "/about";; }, 1000);
             }
 
 
@@ -279,7 +283,7 @@ function initCannon(){
          
 
             
-            
+            //we loop through each letter of each word and then appply force to make it fly
             wordsStorage.forEach(function(word, i){
                 word.children.forEach(letter => {
                     const { body } = letter;

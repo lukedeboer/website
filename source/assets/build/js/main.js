@@ -13,6 +13,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var cannon__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! cannon */ "./node_modules/cannon/build/cannon.js");
 /* harmony import */ var cannon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cannon__WEBPACK_IMPORTED_MODULE_0__);
 //import three.js and cannon js
+//renderer
+ //Physics engine
 
  // declare our global variables
 
@@ -35,7 +37,7 @@ renderer = new three__WEBPACK_IMPORTED_MODULE_1__.WebGLRenderer({
   antialias: true,
   canvas: $container
 });
-renderer.setClearColor(0x202533);
+renderer.setClearColor(0x0000);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true; //call our initialisers for cannon and three.js and animate function
@@ -78,8 +80,8 @@ function initThree() {
       height: 0.4,
       curveSegments: 24,
       bevelEnabled: true,
-      bevelThickness: 0.9,
-      bevelSize: 0.3,
+      bevelThickness: 0.19,
+      bevelSize: 0.01,
       bevelOffset: 0,
       bevelSegments: 10
     };
@@ -99,7 +101,7 @@ function initThree() {
 
       Array.from(innerText).forEach(function (letter, j) {
         var material = new three__WEBPACK_IMPORTED_MODULE_1__.MeshPhongMaterial({
-          color: 0x97df5e
+          color: 0xffffff
         });
         var geometry = new three__WEBPACK_IMPORTED_MODULE_1__.TextBufferGeometry(letter, fontOption);
         geometry.computeBoundingBox();
@@ -112,11 +114,14 @@ function initThree() {
         var box = new (cannon__WEBPACK_IMPORTED_MODULE_0___default().Box)(new (cannon__WEBPACK_IMPORTED_MODULE_0___default().Vec3)().copy(mesh.size).scale(0.5)); //attach the body directly to the mesh
 
         mesh.body = new (cannon__WEBPACK_IMPORTED_MODULE_0___default().Body)({
+          //we divide the total mass by the length of the string to have a common weight for each word
           mass: totalMass / innerText.length,
           position: new (cannon__WEBPACK_IMPORTED_MODULE_0___default().Vec3)(words.letterOff, getOffsetY(i), 0)
-        });
+        }); // add shape to the body and offset it to match of the center of our mesh
+
         var center = mesh.geometry.boundingSphere.center;
-        mesh.body.addShape(box, new (cannon__WEBPACK_IMPORTED_MODULE_0___default().Vec3)(center.x, center.y, center.z));
+        mesh.body.addShape(box, new (cannon__WEBPACK_IMPORTED_MODULE_0___default().Vec3)(center.x, center.y, center.z)); //add body to our world
+
         world.addBody(mesh.body);
         words.add(mesh);
       }); // Recenter each body based on the whole string.
@@ -132,10 +137,10 @@ function initThree() {
 
   var ambientLight = new three__WEBPACK_IMPORTED_MODULE_1__.AmbientLight(0xcccccc);
   scene.add(ambientLight);
-  var foreLight = new three__WEBPACK_IMPORTED_MODULE_1__.DirectionalLight(0xffffff, 0.5);
+  var foreLight = new three__WEBPACK_IMPORTED_MODULE_1__.DirectionalLight(0xffffff, 0.1);
   foreLight.position.set(5, 5, 20);
   scene.add(foreLight);
-  var backLight = new three__WEBPACK_IMPORTED_MODULE_1__.DirectionalLight(0xffffff, 1);
+  var backLight = new three__WEBPACK_IMPORTED_MODULE_1__.DirectionalLight(0xffffff, 0.5);
   backLight.position.set(-5, -5, -5);
   scene.add(backLight);
 }
@@ -217,12 +222,12 @@ function onClick() {
     if (!object.isMesh) return;
     var impulse = new three__WEBPACK_IMPORTED_MODULE_1__.Vector3().copy(face.normal).negate().multiplyScalar(force); // location.reload();
 
-    console.log(object.id);
+    console.log(object.id); //what page to go to depending on what letter of which word was yeeted
 
     if (object.id > 18 && object.id < 27) {
       console.log("going to Projects");
       setTimeout(function () {
-        window.location.href = "http://google.com.au";
+        window.location.href = "/projects";
         ;
       }, 1000);
     }
@@ -230,7 +235,7 @@ function onClick() {
     if (object.id > 27 && object.id < 35) {
       console.log("contact");
       setTimeout(function () {
-        window.location.href = "http://yahoo.com.au";
+        window.location.href = "/contact";
         ;
       }, 1000);
     }
@@ -238,10 +243,11 @@ function onClick() {
     if (object.id > 35 && object.id < 41) {
       console.log("About");
       setTimeout(function () {
-        window.location.href = "http://apple.com.au";
+        window.location.href = "/about";
         ;
       }, 1000);
-    }
+    } //we loop through each letter of each word and then appply force to make it fly
+
 
     wordsStorage.forEach(function (word, i) {
       word.children.forEach(function (letter) {
